@@ -1,5 +1,13 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.urls import reverse
+
+
+class SoftDeleteManager(models.Manager):
+    def active(self):
+        return self.filter(is_deleted=False)
+    def deleted(self):
+        return self.filter(is_deleted=True)
 
 
 class Category(models.Model):
@@ -10,7 +18,7 @@ class Category(models.Model):
         return self.name
 
     class Meta:
-        verbose_name_plural = 'categories'
+        verbose_name_plural = 'Categories'
 
 
 class Product(models.Model):
@@ -20,12 +28,18 @@ class Product(models.Model):
     categories = models.ManyToManyField('Category', related_name='categories', blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
 
+    def get_absolute_url(self):
+        return reverse('api:product-detail', kwargs={'pk': self.pk})
+
+    def get_categories_display(self):
+        return self.categories.all()
+
     def __str__(self):
         return self.name
 
 
 class Photo(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='photo')
     photo = models.ImageField(upload_to='photo', null=True, blank=True)
 
 
