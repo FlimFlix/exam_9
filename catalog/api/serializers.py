@@ -1,5 +1,88 @@
 from webapp.models import Product, Photo, Category, Order
 from rest_framework import serializers
+from django.contrib.auth.models import User
+from rest_framework.exceptions import ValidationError
+from django.contrib.auth import authenticate
+from rest_framework.authtoken.models import Token
+from webapp.models import RegistrationToken
+
+
+class UserRegisterSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+    password_confirm = serializers.CharField(write_only=True)
+
+    def validate(self, attrs):
+        if attrs.get('password') != attrs.get('password_confirm'):
+            raise ValidationError("Passwords do not match")
+        return super().validate(attrs)
+
+    def create(self, validated_data):
+        validated_data.pop('password_confirm')
+        password = validated_data.pop('password')
+        user = super().create(validated_data)
+        user.set_password(password)
+        user.save()
+        return user
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'password', 'password_confirm']
+
+
+class UserSerializer(serializers.ModelSerializer):
+    url = serializers.HyperlinkedIdentityField(view_name='api_v1:user-detail')
+    username = serializers.CharField(read_only=True)
+    password = serializers.CharField(write_only=True)
+    new_password = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    new_password_confirm = serializers.CharField(write_only=True, required=False, allow_blank=True)
+
+    def validate_password(self, value):
+        user = self.context['request'].user
+        if not authenticate(username=user.username, password=value):
+            raise ValidationError('Invalid password for your account')
+        return value
+
+    def validate(self, attrs):
+        if attrs.get('new_password') != attrs.get('new_password_confirm'):
+            raise ValidationError("Passwords do not match")
+        return super().validate(attrs)
+
+    def update(self, instance, validated_data):
+        validated_data.pop('password')
+        new_password = validated_data.pop('new_password')
+        validated_data.pop('new_password_confirm')
+        instance = super().update(instance, validated_data)
+        if new_password:
+            instance.set_password(new_password)
+        instance.save()
+        return instance
+
+    class Meta:
+        model = User
+        fields = ['url', 'id', 'username', 'password', 'new_password', 'new_password_confirm']
+
+
+class AuthTokenSerializer(serializers.Serializer):
+    token = serializers.CharField(write_only=True)
+
+    def validate_token(self, token):
+        try:
+            return Token.objects.get(key=token)
+        except Token.DoesNotExist:
+            raise ValidationError("Invalid credentials")
+
+
+class RegistrationTokenSerializer(serializers.Serializer):
+    token = serializers.UUIDField(write_only=True)
+
+    def validate_token(self, token_value):
+        try:
+            token = RegistrationToken.objects.get(token=token_value)
+            if token.is_expired():
+                raise ValidationError("Token expired")
+            return token
+        except RegistrationToken.DoesNotExist:
+            raise ValidationError("Token does not exist or already used")
 
 
 class CategorySerializer(serializers.ModelSerializer):
