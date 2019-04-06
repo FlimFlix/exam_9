@@ -7,9 +7,14 @@ import Layout from './components/Layout/Layout';
 import ProductDetail from "./containers/ProductDetail/ProductDetail";
 import Login from "./containers/Login/Login";
 import Logout from "./containers/Logout/Logout";
+import {tokenLogin} from "./store/actions/token-login";
 
 
 class App extends Component {
+    componentDidMount() {
+        this.props.tokenLogin();
+    }
+
     render() {
         return (
             <BrowserRouter>
@@ -28,6 +33,8 @@ class App extends Component {
 
 
 const mapStateToProps = state => state.app;
-const mapDispatchToProps = dispatch => ({});
+const mapDispatchToProps = dispatch => ({
+    tokenLogin: () => dispatch(tokenLogin())
+});
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

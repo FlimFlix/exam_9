@@ -4,33 +4,10 @@ from django.contrib.auth.models import User
 from rest_framework.exceptions import ValidationError
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
-from webapp.models import RegistrationToken
-
-
-class UserRegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)
-    password_confirm = serializers.CharField(write_only=True)
-
-    def validate(self, attrs):
-        if attrs.get('password') != attrs.get('password_confirm'):
-            raise ValidationError("Passwords do not match")
-        return super().validate(attrs)
-
-    def create(self, validated_data):
-        validated_data.pop('password_confirm')
-        password = validated_data.pop('password')
-        user = super().create(validated_data)
-        user.set_password(password)
-        user.save()
-        return user
-
-    class Meta:
-        model = User
-        fields = ['id', 'username', 'password', 'password_confirm']
 
 
 class UserSerializer(serializers.ModelSerializer):
-    url = serializers.HyperlinkedIdentityField(view_name='api_v1:user-detail')
+    url = serializers.HyperlinkedIdentityField(view_name='api:user-detail')
     username = serializers.CharField(read_only=True)
     password = serializers.CharField(write_only=True)
     new_password = serializers.CharField(write_only=True, required=False, allow_blank=True)

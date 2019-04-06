@@ -12,10 +12,15 @@ class ProductDetail extends Component {
     render() {
         if (!this.props.product) return null;
 
-        const {name, photo, description, receipt_date} = this.props.product;
+        const {name, photo, description, receipt_date, price} = this.props.product;
 
         return <div className="product mt-4">
-            <h2 className="title">{name}</h2>
+            <h2 className="title">{name} - {price}$</h2>
+            <h4 className="center">Дата завоза: {receipt_date}</h4>
+            <h4 className="center">Категория:
+            {this.props.product.categories.map((category) => {
+                return <span className="center" key={category}>{category.name}</span>
+            })}</h4>
             <div className="row">
                 {photo[0] ? photo.map((photo, id) => {
                         return (
@@ -29,11 +34,6 @@ class ProductDetail extends Component {
             {description ? <div className="description-box text-muted m-2">
                 <p>{description}</p>
             </div> : null}
-            <h4 className="center">Дата завоза: {receipt_date}</h4>
-            <h4 className="center">Категория:
-            {this.props.product.categories.map((category) => {
-                return <span className="center" key={category}>{category.name}</span>
-            })}</h4>
         </div>
 
     }

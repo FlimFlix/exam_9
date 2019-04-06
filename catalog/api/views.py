@@ -1,9 +1,8 @@
 from webapp.models import Product, Photo, Category, Order
 from api.serializers import ProductSerializer, PhotoSerializer, CategorySerializer, OrderSerializer, \
-    UserSerializer, UserRegisterSerializer, AuthTokenSerializer
-from webapp.models import RegistrationToken
+    UserSerializer, AuthTokenSerializer
 from django.contrib.auth.models import User
-from api.serializers import UserSerializer, UserRegisterSerializer, AuthTokenSerializer
+from api.serializers import UserSerializer, AuthTokenSerializer
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.generics import CreateAPIView
@@ -26,15 +25,6 @@ class UserViewSet(viewsets.ModelViewSet):
         super().check_object_permissions(request, obj)
         if request.method in ['PUT', 'PATCH', 'DELETE'] and obj != request.user:
             self.permission_denied(request, 'Can not edit other users data!')
-
-
-class UserCreateView(CreateAPIView):
-    model = User
-    serializer_class = UserRegisterSerializer
-    permission_classes = [AllowAny]
-
-    def create_token(self, user):
-        return RegistrationToken.objects.create(user=user)
 
 
 class LoginView(ObtainAuthToken):

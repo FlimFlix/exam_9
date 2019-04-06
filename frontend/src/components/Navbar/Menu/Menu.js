@@ -1,6 +1,5 @@
 import React, {Component, Fragment} from 'react'
 import MenuItem from "./MenuItem/MenuItem";
-import {NavLink} from "react-router-dom";
 import {connect} from "react-redux";
 
 
@@ -14,8 +13,9 @@ class Menu extends Component {
     };
 
     render() {
-        const {username, user_id} = this.props.auth;
-        return <Fragment>
+        const {username, id} = this.props.auth;
+        console.log(this.props.auth);
+        return <Fragment className='container'>
             <button onClick={this.toggle}
                     className="navbar-toggler"
                     type="button"
@@ -30,11 +30,11 @@ class Menu extends Component {
                     <MenuItem to="/">Продукты</MenuItem>
                 </ul>
                 <ul className="navbar-nav ml-auto">
-                    {user_id ? [
-                        <li className="nav-item" key="username"><span className="navbar-text">
-                            Привет, <NavLink to={"/users/" + localStorage.getItem('user_id')}>{username}</NavLink>!
-                        </span></li>,
-                        <MenuItem to="/logout   " key="logout">Выйти</MenuItem>
+                    {id ? [
+                        <li className="nav-item" key="username">
+                            <span className="navbar-text">Привет, {username}!</span>
+                        </li>,
+                        <MenuItem to="/logout" key="logout">Выйти</MenuItem>
                     ] : [
                         <MenuItem to="/login" key="login">Войти</MenuItem>,
                     ]}
