@@ -1,28 +1,33 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, {Component} from 'react';
+import {BrowserRouter} from 'react-router-dom';
+import {Switch, Route} from "react-router";
+import ProductList from './containers/ProductList/ProductList'
+import {connect} from "react-redux";
+import Layout from './components/Layout/Layout';
+import ProductDetail from "./containers/ProductDetail/ProductDetail";
+import Login from "./containers/Login/Login";
+import Logout from "./containers/Logout/Logout";
+
 
 class App extends Component {
-  render() {
-    return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
-      </div>
-    );
-  }
+    render() {
+        return (
+            <BrowserRouter>
+                <Layout>
+                    <Switch>
+                        <Route path="/products/:id" component={ProductDetail} exact/>
+                        <Route path="/login" component={Login}/>
+                        <Route path="/logout" component={Logout}/>
+                        <Route path="/" component={ProductList} exact/>
+                    </Switch>
+                </Layout>
+            </BrowserRouter>
+        );
+    }
 }
 
-export default App;
+
+const mapStateToProps = state => state.app;
+const mapDispatchToProps = dispatch => ({});
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
